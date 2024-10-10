@@ -100,4 +100,19 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart) {
 	HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9 | GPIO_PIN_10);
 }
 
+void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc) {
+	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+	PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+	{
+	  Error_Handler();
+	}
+	__HAL_RCC_RTC_ENABLE();
+}
+
+void HAL_RTC_MspDeInit(RTC_HandleTypeDef *hrtc) {
+	__HAL_RCC_RTC_DISABLE();
+}
+
 /* USER CODE END 1 */

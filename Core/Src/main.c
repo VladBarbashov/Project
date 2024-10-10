@@ -26,6 +26,7 @@
 #include "gpio_init.h"
 #include "tim_init.h"
 #include "usart1_init.h"
+#include "rtc_init.h"
 
 /* USER CODE END Includes */
 
@@ -48,6 +49,7 @@
 
 /* USER CODE BEGIN PV */
 UART_HandleTypeDef huart1;
+RTC_HandleTypeDef hrtc;
 
 uint16_t adcData[4] = {};
 
@@ -96,8 +98,9 @@ int main(void)
   CMSIS_ADC1_Init();
   CMSIS_DMA2_Init((uint32_t)&ADC1->DR, (uint32_t)adcData);
   HAL_GPIOC_Init();
-  CMSIS_TIM2_Init();
   HAL_USART1_Init(&huart1);
+  HAL_RTClk_Init(&hrtc, &huart1);
+  CMSIS_TIM2_Init();
 
   /* USER CODE END 2 */
 
@@ -106,6 +109,7 @@ int main(void)
   while (1)
   {
 	HAL_Delay(10000);
+
 
     /* USER CODE END WHILE */
 
@@ -131,8 +135,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)

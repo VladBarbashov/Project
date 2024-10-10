@@ -45,6 +45,7 @@
 /* USER CODE BEGIN PV */
 extern uint16_t adcData[4];
 extern UART_HandleTypeDef huart1;
+extern RTC_HandleTypeDef hrtc;
 
 /* USER CODE END PV */
 
@@ -215,12 +216,18 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	uint32_t middleValue = (adcData[0]+adcData[1]+adcData[2]) / 3;
 	float temp = (middleValue*3.3/4095 - 0.76) / 0.0025 + 25;
-	float vcc = (4095/adcData[4])*1.21;
+	float vcc = (4095/adcData[3])*1.21;
 
 	char str[100];
-	sprintf(str, "{ \"Time\": \"15.02.2023 14:30:00\", \"Temp\": %.1f }\n", temp);
+	RTC_TimeTypeDef sTime = {0};
+	RTC_DateTypeDef sDate = {0};
+	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+	sprintf(str, "{ \"DateTime\": \"%02d.%02d.%02d %02d:%02d:%02d\", \"Temp\": %.1f }\n",
+			sDate.Date, sDate.Month, sDate.Year,
+			sTime.Hours, sTime.Minutes, sTime.Seconds, temp);
 
-	HAL_UART_Transmit(&huart1, (uint8_t*)str, 49, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)str, 50, HAL_MAX_DELAY);
 
 	DMA2->LIFCR |= DMA_LIFCR_CTCIF0; // очистка флага
 }
